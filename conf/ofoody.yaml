@@ -1,0 +1,15 @@
+uwsgi:
+    plugins:  psgi
+    socket: /var/tmp/ofoody.sock
+    #pythonpath: /home/firolunis/www/pycmp/www/
+    chdir: /home/firolunis/www/ofoody/www/
+    psgi: ofoody.pl
+    #module: ofoody.pl
+    daemonize: /home/firolunis/www/ofoody/logs/uwsgi.log
+    max-requests: 5000
+    buffer-size: 32768
+    harakiri: 30
+    reload-mercy: 8
+    master: 1
+    no-orphans: 1
+    touch-reload: /home/firolunis/www/ofoody/uwsgi
