@@ -3,8 +3,9 @@
 SibirCTF 2015 O'Foody service
 
 ## Installation
-
-aptitude install nginx uwsgi-plugin-psgi
+Install dependencies
+    aptitude install nginx uwsgi-plugin-psgi postgres
+    cpan DBI
 
 ## Usage
 
@@ -16,4 +17,4 @@ Vladislav A. Retivykh
 
 ## License
 
-TODO: Write license
+You may distribute under the terms of the GNU General Public License
