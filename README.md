@@ -1,20 +1,28 @@
-# O'Foody
+O'Foody
+=======
 
 SibirCTF 2015 O'Foody service
 
-## Installation
+Installation
+------------
 Install dependencies
-    aptitude install nginx uwsgi-plugin-psgi postgres
-    cpan DBI
+```
+aptitude install nginx uwsgi-plugin-psgi postgresql`
+cpan DBI
+```
 
-## Usage
+Change paths in conf/ofoodly.yaml and conf/ofoodly.conf
+Usage
+-----
 
 TODO: Write usage instructions
 
-## Credits
+Credits
+-------
 
 Vladislav A. Retivykh
 
-## License
+License
+-------
 
 You may distribute under the terms of the GNU General Public License
