@@ -22,42 +22,33 @@ use strict;
 use warnings FATAL => 'all';
 use utf8;
 
-use Data::Dumper;
 use Switch;
 
-my $HTML_DIR = 'static/';
-my %FILES = (
-    'MAIN_PAGE' => 'index.html',
-    'ERROR_PAGE' => 'error.html',
-    'SIGNUP_PAGE' => 'signup.html',
-    'LOGIN_PAGE' => 'login.html',
-    'RESTORE_PAGE' => 'restore.html',
-    'PASSWD_PAGE' => 'passwd.html',
-    'PROFILE_PAGE' => 'profile.html',
-    'REVIEWS_PAGE' => 'reviews.html'
-);
+use Ui;
+
 #===  FUNCTION  ===============================================================
-#         NAME: _get_cookies
-#      PURPOSE: Extracting cookies
+#         NAME: _get_cookie
+#      PURPOSE: Extracting cookie
 #   PARAMETERS: Environment dictionary
-#      RETURNS: {Cookies}
+#      RETURNS: {Cookie}
 #  DESCRIPTION: Extract and parse cookie from environment dictionary
 #       THROWS: ---
 #     COMMENTS: ---
 #     SEE ALSO: ---
 #==============================================================================
-sub _get_cookies {
-    my $env = shift;
-    my $raw_cookies = '';
-    $raw_cookies = $env->{'HTTP_COOKIE'} if exists $env->{'HTTP_COOKIE'};
-    my @baked_cookies = split /; /, $raw_cookies;
-    my %cookies;
-    foreach my $item (@baked_cookies) {
+sub _get_cookie {
+    my $env         = shift;
+    my $raw_cookie  = '';
+    $raw_cookie     = $env->{'HTTP_COOKIE'} if exists $env->{'HTTP_COOKIE'};
+    my @baked_cookie    = split /; /, $raw_cookie;
+    my %cookie;
+    foreach my $item (@baked_cookie) {
         my ($i, $j) = split /=/, $item;
-        $cookies{$i} = $j;
+        $cookie{$i} = $j;
     }
-    return %cookies;
+    return %cookie;
 }
+
 #===  FUNCTION  ===============================================================
 #         NAME: _get_post_data
 #      PURPOSE: Extracting POST data
@@ -69,18 +60,19 @@ sub _get_cookies {
 #     SEE ALSO: ---
 #==============================================================================
 sub _get_post_data {
-    my $env = shift;
-    my $content_length = $env->{'CONTENT_LENGTH'};
+    my $env             = shift;
+    my $content_length  = $env->{'CONTENT_LENGTH'};
     my $raw_post_data;
     $env->{'psgi.input'}->read($raw_post_data, $content_length);
     my @prepared_post_data = split /&/, $raw_post_data;
     my %post_data;
     foreach my $item (@prepared_post_data) {
-        my ($i, $j) = split /=/, $item;
-        $post_data{$i} = $j;
+        my ($i, $j)     = split /=/, $item;
+        $post_data{$i}  = $j;
     }
     return %post_data;
 }
+
 #===  FUNCTION  ===============================================================
 #         NAME: _get_query_data
 #      PURPOSE: Extracting query data
@@ -92,16 +84,17 @@ sub _get_post_data {
 #     SEE ALSO: ---
 #==============================================================================
 sub _get_query_data {
-    my $env = shift;
-    my $raw_query_data = $env->{'QUERY_STRING'};
+    my $env                 = shift;
+    my $raw_query_data      = $env->{'QUERY_STRING'};
     my @prepared_query_data = split /&/, $raw_query_data;
     my %query_data;
     foreach my $item (@prepared_query_data) {
-        my ($i, $j) = split /=/, $item;
+        my ($i, $j)     = split /=/, $item;
         $query_data{$i} = $j;
     }
     return %query_data;
 }
+
 #===  FUNCTION  ===============================================================
 #         NAME: _get_path
 #      PURPOSE: Extracting path 
@@ -113,31 +106,14 @@ sub _get_query_data {
 #     SEE ALSO: ---
 #==============================================================================
 sub _get_path {
-    my $env = shift;
-    my $raw_path = $env->{'PATH_INFO'};
-    my @path = split /\//, $raw_path;
+    my $env         = shift;
+    my $raw_path    = $env->{'PATH_INFO'};
+    my @path        = split /\//, $raw_path;
     shift @path;
     push @path, '' if not @path;
     return @path;
 }
-#===  FUNCTION  ===============================================================
-#         NAME: _read_file
-#      PURPOSE: Reading HTML files 
-#   PARAMETERS: Path to file
-#      RETURNS: File content
-#  DESCRIPTION: Read file to string
-#       THROWS: ---
-#     COMMENTS: ---
-#     SEE ALSO: ---
-#==============================================================================
-sub _read_file {
-    local $/;
-    my $path_to_file = shift;
-    open(INFILE, $path_to_file) or die "Can't read file $path_to_file [$!]\n";  
-    my $content = <INFILE>; 
-    close (FILE);  
-    return $content;
-}
+
 #===  FUNCTION  ===============================================================
 #         NAME: choose_action
 #      PURPOSE: Handle request
@@ -149,39 +125,38 @@ sub _read_file {
 #     SEE ALSO: ---
 #==============================================================================
 sub choose_action {
-    my $env = shift;
-    my $env_str = Dumper($env);
-    my @query_data = _get_path($env);
+    my $env         = shift;
+    my @query_data  = _get_path($env);
     my $response;
     switch ($query_data[0]) {
         case '' {
-            $response = _read_file($HTML_DIR . $FILES{'MAIN_PAGE'});
-            # $response = _read_file('static/' . 'index.html');
+            $response = Ui::main_page();
         }
         case 'login' {
-            $response = _read_file($HTML_DIR . $FILES{'LOGIN_PAGE'});
+            $response = Ui::login_page();
         }
         case 'signup' {
-            $response = _read_file($HTML_DIR . $FILES{'SIGNUP_PAGE'});
+            $response = Ui::signup_page();
         }
         case 'passwd' {
-            $response = _read_file($HTML_DIR . $FILES{'PASSWD_PAGE'});
+            $response = Ui::passwd_page();
         }
         case 'restore' {
-            $response = _read_file($HTML_DIR . $FILES{'RESTORE_PAGE'});
+            $response = Ui::restore_page();
         }
         case 'reviews' {
-            $response = _read_file($HTML_DIR . $FILES{'REVIEWS_PAGE'});
+            $response = Ui::reviews_page();
         }
         case 'profile' {
-            $response = _read_file($HTML_DIR . $FILES{'PROFILE_PAGE'});
+            $response = Ui::profile_page();
         }
         else {
-            $response = _read_file($HTML_DIR . $FILES{'ERROR_PAGE'});
+            $response = Ui::error_page();
         }
     }
     return [200, ['Content-Type' => 'text/html'], ["$response\n"]];
 }
+
 #===  FUNCTION  ===============================================================
 #         NAME: app
 #      PURPOSE: O'Foody web service enter point
