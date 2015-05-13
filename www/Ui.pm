@@ -25,20 +25,61 @@ use warnings FATAL => 'all';
 use utf8;
 
 my $HTML_DIR    = 'static/';
-my %FILES       = (
-    'MAIN_PAGE'     => 'index.html',
-    'ERROR_PAGE'    => 'error.html',
-    'SIGNUP_PAGE'   => 'signup.html',
-    'LOGIN_PAGE'    => 'login.html',
-    'RESTORE_PAGE'  => 'restore.html',
-    'PASSWD_PAGE'   => 'passwd.html',
-    'PROFILE_PAGE'  => 'profile.html',
-    'REVIEWS_PAGE'  => 'reviews.html'
+my %PAGES       = (
+    'MAIN_PAGE'     => [
+        'index.html',
+        'Cookie in the jar',
+        'Whiskey and cookies delivery'
+    ],
+    'ERROR_PAGE'    => [
+        'error.html',
+        'Error',
+        'Something went wrong'
+    ],
+    'SIGNUP_PAGE'   => [
+        'signup.html',
+        'Sign Up',
+        'Registration'
+    ],
+    'LOGIN_PAGE'    => [
+        'login.html',
+        'Log In',
+        'Log In'
+    ],
+    'RESTORE_PAGE'  => [
+        'restore.html',
+        'Restore password',
+        'Restore password'
+    ],
+    'PASSWD_PAGE'   => [
+        'passwd.html',
+        'Change password',
+        'Change password'
+    ],
+    'PROFILE_PAGE'  => [
+        'profile.html',
+        'View profile',
+        'Profile'
+    ],
+    'REVIEWS_PAGE'  => [
+        'reviews.html',
+        'Read users reviews',
+        'Reviews'
+    ],
+    'HEADER'        => [
+        'header.html'
+    ],
+    'HEADER_USER'   => [
+        'header_user.html'
+    ],
+    'FOOTER'        => [
+        'footer.html'
+    ]
 );
 
 #===  FUNCTION  ===============================================================
 #         NAME: _read_file
-#      PURPOSE: Reading HTML files 
+#      PURPOSE: Reading HTML PAGES 
 #   PARAMETERS: Path to file
 #      RETURNS: File content
 #  DESCRIPTION: Read file to string
@@ -56,6 +97,26 @@ sub _read_file {
 }
 
 #===  FUNCTION  ===============================================================
+#         NAME: _format
+#      PURPOSE: Formatting strings
+#   PARAMETERS: String, {Content}
+#      RETURNS: Formatted string
+#  DESCRIPTION: Fill string with hash values
+#       THROWS: ---
+#     COMMENTS: ---
+#     SEE ALSO: ---
+#==============================================================================
+sub _format {
+    my $string      = shift;
+    my $raw_content = shift;
+    my %content     = %$raw_content if $raw_content;
+    foreach my $key (keys %content) {
+        $string =~ s/\{$key\}/$content{$key}/;
+    }
+    return $string;
+}
+
+#===  FUNCTION  ===============================================================
 #         NAME: main_page
 #      PURPOSE: Generating main page
 #   PARAMETERS: ---
@@ -66,7 +127,23 @@ sub _read_file {
 #     SEE ALSO: ---
 #==============================================================================
 sub main_page {
-	return _read_file($HTML_DIR . $FILES{'MAIN_PAGE'});
+    my $raw_content = shift;
+    my %content     = %$raw_content if $raw_content;
+    %content        = (
+        %content,
+        'title' => $PAGES{'MAIN_PAGE'}[1],
+        'head'  => $PAGES{'MAIN_PAGE'}[2]
+    );
+    my $page;
+    if (exists $content{'name'}) {
+        $page = _read_file($HTML_DIR . $PAGES{'HEADER_USER'}[0]);
+    } else {
+        $page = _read_file($HTML_DIR . $PAGES{'HEADER'}[0]);
+    }
+    $page   .=  _read_file($HTML_DIR . $PAGES{'MAIN_PAGE'}[0]);
+    $page   .=  _read_file($HTML_DIR . $PAGES{'FOOTER'}[0]);
+    $page   =   _format($page, \%content);
+    return $page;
 }
 
 #===  FUNCTION  ===============================================================
@@ -80,7 +157,26 @@ sub main_page {
 #     SEE ALSO: ---
 #==============================================================================
 sub error_page {
-	return _read_file($HTML_DIR . $FILES{'ERROR_PAGE'});
+    my $raw_content = shift;
+    my %content     = %$raw_content if $raw_content;
+    %content        = (
+        %content,
+        'title' => $PAGES{'ERROR_PAGE'}[1],
+        'head'  => $PAGES{'ERROR_PAGE'}[2]
+    );
+    if (!exists $content{'msg'}) {
+        $content{'msg'} = '';
+    }
+    my $page;
+    if (exists $content{'name'}) {
+        $page = _read_file($HTML_DIR . $PAGES{'HEADER_USER'}[0]);
+    } else {
+        $page = _read_file($HTML_DIR . $PAGES{'HEADER'}[0]);
+    }
+    $page   .=  _read_file($HTML_DIR . $PAGES{'ERROR_PAGE'}[0]);
+    $page   .=  _read_file($HTML_DIR . $PAGES{'FOOTER'}[0]);
+    $page   =   _format($page, \%content);
+    return $page;
 }
 
 #===  FUNCTION  ===============================================================
@@ -94,7 +190,22 @@ sub error_page {
 #     SEE ALSO: ---
 #==============================================================================
 sub signup_page {
-	return _read_file($HTML_DIR . $FILES{'SIGNUP_PAGE'});
+    my $raw_content = shift;
+    my %content     = %$raw_content if $raw_content;
+    %content        = (
+        %content,
+        'title' => $PAGES{'SIGNUP_PAGE'}[1],
+        'head'  => $PAGES{'SIGNUP_PAGE'}[2]
+    );
+    if (!exists $content{'msg'}) {
+        $content{'msg'} = '';
+    }
+    my $page;
+    $page   =   _read_file($HTML_DIR . $PAGES{'HEADER'}[0]);
+    $page   .=  _read_file($HTML_DIR . $PAGES{'SIGNUP_PAGE'}[0]);
+    $page   .=  _read_file($HTML_DIR . $PAGES{'FOOTER'}[0]);
+    $page   =   _format($page, \%content);
+    return $page;
 }
 
 #===  FUNCTION  ===============================================================
@@ -108,7 +219,22 @@ sub signup_page {
 #     SEE ALSO: ---
 #==============================================================================
 sub login_page {
-	return _read_file($HTML_DIR . $FILES{'LOGIN_PAGE'});
+    my $raw_content = shift;
+    my %content     = %$raw_content if $raw_content;
+    %content        = (
+        %content,
+        'title' => $PAGES{'LOGIN_PAGE'}[1],
+        'head'  => $PAGES{'LOGIN_PAGE'}[2]
+    );
+    if (!exists $content{'msg'}) {
+        $content{'msg'} = '';
+    }
+    my $page;
+    $page   =   _read_file($HTML_DIR . $PAGES{'HEADER'}[0]);
+    $page   .=  _read_file($HTML_DIR . $PAGES{'LOGIN_PAGE'}[0]);
+    $page   .=  _read_file($HTML_DIR . $PAGES{'FOOTER'}[0]);
+    $page   =   _format($page, \%content);
+    return $page;
 }
 
 #===  FUNCTION  ===============================================================
@@ -122,7 +248,22 @@ sub login_page {
 #     SEE ALSO: ---
 #==============================================================================
 sub restore_page {
-	return _read_file($HTML_DIR . $FILES{'RESTORE_PAGE'});
+    my $raw_content = shift;
+    my %content     = %$raw_content if $raw_content;
+    %content        = (
+        %content,
+        'title' => $PAGES{'RESTORE_PAGE'}[1],
+        'head'  => $PAGES{'RESTORE_PAGE'}[2]
+    );
+    if (!exists $content{'msg'}) {
+        $content{'msg'} = '';
+    }
+    my $page;
+    $page   =   _read_file($HTML_DIR . $PAGES{'HEADER'}[0]);
+    $page   .=  _read_file($HTML_DIR . $PAGES{'RESTORE_PAGE'}[0]);
+    $page   .=  _read_file($HTML_DIR . $PAGES{'FOOTER'}[0]);
+    $page   =   _format($page, \%content);
+    return $page;
 }
 
 #===  FUNCTION  ===============================================================
@@ -136,7 +277,22 @@ sub restore_page {
 #     SEE ALSO: ---
 #==============================================================================
 sub passwd_page {
-	return _read_file($HTML_DIR . $FILES{'PASSWD_PAGE'});
+    my $raw_content = shift;
+    my %content     = %$raw_content if $raw_content;
+    %content        = (
+        %content,
+        'title' => $PAGES{'PASSWD_PAGE'}[1],
+        'head'  => $PAGES{'PASSWD_PAGE'}[2]
+    );
+    if (!exists $content{'msg'}) {
+        $content{'msg'} = '';
+    }
+    my $page;
+    $page   =   _read_file($HTML_DIR . $PAGES{'HEADER_USER'}[0]);
+    $page   .=  _read_file($HTML_DIR . $PAGES{'PASSWD_PAGE'}[0]);
+    $page   .=  _read_file($HTML_DIR . $PAGES{'FOOTER'}[0]);
+    $page   =   _format($page, \%content);
+    return $page;
 }
 
 #===  FUNCTION  ===============================================================
@@ -150,7 +306,26 @@ sub passwd_page {
 #     SEE ALSO: ---
 #==============================================================================
 sub profile_page {
-	return _read_file($HTML_DIR . $FILES{'PROFILE_PAGE'});
+    my $raw_content = shift;
+    my %content     = %$raw_content if $raw_content;
+    %content        = (
+        %content,
+        'title' => $PAGES{'PROFILE_PAGE'}[1],
+        'head'  => $PAGES{'PROFILE_PAGE'}[2]
+    );
+    if (!exists $content{'msg'}) {
+        $content{'msg'} = '';
+    }
+    my $page;
+    if (exists $content{'name'}) {
+        $page = _read_file($HTML_DIR . $PAGES{'HEADER_USER'}[0]);
+    } else {
+        $page = _read_file($HTML_DIR . $PAGES{'HEADER'}[0]);
+    }
+    $page   .=  _read_file($HTML_DIR . $PAGES{'PROFILE_PAGE'}[0]);
+    $page   .=  _read_file($HTML_DIR . $PAGES{'FOOTER'}[0]);
+    $page   =   _format($page, \%content);
+    return $page;
 }
 
 #===  FUNCTION  ===============================================================
@@ -164,7 +339,26 @@ sub profile_page {
 #     SEE ALSO: ---
 #==============================================================================
 sub reviews_page {
-	return _read_file($HTML_DIR . $FILES{'REVIEWS_PAGE'});
+    my $raw_content = shift;
+    my %content     = %$raw_content if $raw_content;
+    %content        = (
+        %content,
+        'title' => $PAGES{'REVIEWS_PAGE'}[1],
+        'head'  => $PAGES{'REVIEWS_PAGE'}[2]
+    );
+    if (!exists $content{'msg'}) {
+        $content{'msg'} = '';
+    }
+    my $page;
+    if (exists $content{'name'}) {
+        $page = _read_file($HTML_DIR . $PAGES{'HEADER_USER'}[0]);
+    } else {
+        $page = _read_file($HTML_DIR . $PAGES{'HEADER'}[0]);
+    }
+    $page   .=  _read_file($HTML_DIR . $PAGES{'REVIEWS_PAGE'}[0]);
+    $page   .=  _read_file($HTML_DIR . $PAGES{'FOOTER'}[0]);
+    $page   =   _format($page, \%content);
+    return $page;
 }
 
 

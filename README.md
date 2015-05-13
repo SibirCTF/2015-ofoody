@@ -7,11 +7,12 @@ Installation
 ------------
 Install dependencies
 ```
-aptitude install nginx uwsgi-plugin-psgi postgresql`
-cpan DBI
+aptitude install nginx uwsgi-plugin-psgi postgresql
 ```
 
 Change paths in conf/ofoodly.yaml and conf/ofoodly.conf
+Copy or link conf/ofoodly.conf to /etc/nginx/sites-enabled/
+
 Usage
 -----
 

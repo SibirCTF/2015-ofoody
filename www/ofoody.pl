@@ -24,6 +24,8 @@ use utf8;
 
 use Switch;
 
+use Data::Dumper;
+
 use Ui;
 
 #===  FUNCTION  ===============================================================
@@ -37,9 +39,10 @@ use Ui;
 #     SEE ALSO: ---
 #==============================================================================
 sub _get_cookie {
-    my $env         = shift;
+    my $raw_env     = shift;
+    my %env         = %$raw_env;
     my $raw_cookie  = '';
-    $raw_cookie     = $env->{'HTTP_COOKIE'} if exists $env->{'HTTP_COOKIE'};
+    $raw_cookie     = $env{'HTTP_COOKIE'} if exists $env{'HTTP_COOKIE'};
     my @baked_cookie    = split /; /, $raw_cookie;
     my %cookie;
     foreach my $item (@baked_cookie) {
@@ -60,10 +63,12 @@ sub _get_cookie {
 #     SEE ALSO: ---
 #==============================================================================
 sub _get_post_data {
-    my $env             = shift;
-    my $content_length  = $env->{'CONTENT_LENGTH'};
+    my $raw_env         = shift;
+    my %env             = %$raw_env;
+    my $content_length  = 0;
+    $content_length     = $env{'CONTENT_LENGTH'} if $env{'CONTENT_LENGTH'};
     my $raw_post_data;
-    $env->{'psgi.input'}->read($raw_post_data, $content_length);
+    $env{'psgi.input'}->read($raw_post_data, $content_length);
     my @prepared_post_data = split /&/, $raw_post_data;
     my %post_data;
     foreach my $item (@prepared_post_data) {
@@ -84,8 +89,9 @@ sub _get_post_data {
 #     SEE ALSO: ---
 #==============================================================================
 sub _get_query_data {
-    my $env                 = shift;
-    my $raw_query_data      = $env->{'QUERY_STRING'};
+    my $raw_env             = shift;
+    my %env                 = %$raw_env;
+    my $raw_query_data      = $env{'QUERY_STRING'};
     my @prepared_query_data = split /&/, $raw_query_data;
     my %query_data;
     foreach my $item (@prepared_query_data) {
@@ -106,8 +112,9 @@ sub _get_query_data {
 #     SEE ALSO: ---
 #==============================================================================
 sub _get_path {
-    my $env         = shift;
-    my $raw_path    = $env->{'PATH_INFO'};
+    my $raw_env     = shift;
+    my %env         = %$raw_env;
+    my $raw_path    = $env{'PATH_INFO'};
     my @path        = split /\//, $raw_path;
     shift @path;
     push @path, '' if not @path;
@@ -125,15 +132,18 @@ sub _get_path {
 #     SEE ALSO: ---
 #==============================================================================
 sub choose_action {
-    my $env         = shift;
-    my @query_data  = _get_path($env);
+    my $raw_env = shift;
+    my %env     = %$raw_env;
+    my @path    = _get_path(\%env);
     my $response;
-    switch ($query_data[0]) {
+    switch ($path[0]) {
         case '' {
             $response = Ui::main_page();
         }
         case 'login' {
-            $response = Ui::login_page();
+            my %content;
+            $content{'msg'} = Dumper(_get_post_data(\%env));
+            $response = Ui::login_page(\%content);
         }
         case 'signup' {
             $response = Ui::signup_page();
@@ -151,7 +161,10 @@ sub choose_action {
             $response = Ui::profile_page();
         }
         else {
-            $response = Ui::error_page();
+            my %content = (
+                'msg' => 'File not found'
+            );
+            $response = Ui::error_page(\%content);
         }
     }
     return [200, ['Content-Type' => 'text/html'], ["$response\n"]];
@@ -169,5 +182,5 @@ sub choose_action {
 #==============================================================================
 my $app = sub {
     my $env = shift;
-    return &choose_action($env);
+    return &choose_action(\%$env);
 };
