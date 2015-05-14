@@ -27,6 +27,7 @@ use Switch;
 use Data::Dumper;
 
 use Ui;
+use Db;
 
 #===  FUNCTION  ===============================================================
 #         NAME: _get_cookie
@@ -74,6 +75,8 @@ sub _get_post_data {
     foreach my $item (@prepared_post_data) {
         my ($i, $j)     = split /=/, $item;
         $post_data{$i}  = $j;
+        $post_data{$i}  =~ tr/+/ /;
+        $post_data{$i}  =~ s/%([\da-f][\da-f])/chr( hex($1) )/egi;
     }
     return %post_data;
 }
@@ -97,13 +100,15 @@ sub _get_query_data {
     foreach my $item (@prepared_query_data) {
         my ($i, $j)     = split /=/, $item;
         $query_data{$i} = $j;
+        $query_data{$i} =~ tr/+/ /;
+        $query_data{$i} =~ s/%([\da-f][\da-f])/chr( hex($1) )/egi;
     }
     return %query_data;
 }
 
 #===  FUNCTION  ===============================================================
 #         NAME: _get_path
-#      PURPOSE: Extracting path 
+#      PURPOSE: Extracting path
 #   PARAMETERS: Environment dictionary
 #      RETURNS: [Path]
 #  DESCRIPTION: Extract and parse path from environment dictionary
@@ -146,7 +151,20 @@ sub choose_action {
             $response = Ui::login_page(\%content);
         }
         case 'signup' {
-            $response = Ui::signup_page();
+            my %content;
+            my %post_data = _get_post_data(\%env);
+            if (%post_data) {
+                my @values = (
+                    $post_data{'username'},
+                    $post_data{'review'},
+                    $post_data{'ccn'},
+                    $post_data{'address'},
+                    $post_data{'password'}
+                );
+                Db::insert('USERS', \@values);
+                $content{'msg'} = 'OK';
+            }
+            $response = Ui::signup_page(\%content);
         }
         case 'passwd' {
             $response = Ui::passwd_page();

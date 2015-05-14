@@ -79,7 +79,7 @@ my %PAGES       = (
 
 #===  FUNCTION  ===============================================================
 #         NAME: _read_file
-#      PURPOSE: Reading HTML PAGES 
+#      PURPOSE: Reading HTML PAGES
 #   PARAMETERS: Path to file
 #      RETURNS: File content
 #  DESCRIPTION: Read file to string
@@ -107,9 +107,10 @@ sub _read_file {
 #     SEE ALSO: ---
 #==============================================================================
 sub _format {
+    my %content;
     my $string      = shift;
     my $raw_content = shift;
-    my %content     = %$raw_content if $raw_content;
+    %content        = %$raw_content if $raw_content;
     foreach my $key (keys %content) {
         $string =~ s/\{$key\}/$content{$key}/;
     }
@@ -127,8 +128,9 @@ sub _format {
 #     SEE ALSO: ---
 #==============================================================================
 sub main_page {
+    my %content;
     my $raw_content = shift;
-    my %content     = %$raw_content if $raw_content;
+    %content        = %$raw_content if $raw_content;
     %content        = (
         %content,
         'title' => $PAGES{'MAIN_PAGE'}[1],
@@ -157,8 +159,9 @@ sub main_page {
 #     SEE ALSO: ---
 #==============================================================================
 sub error_page {
+    my %content;
     my $raw_content = shift;
-    my %content     = %$raw_content if $raw_content;
+    %content        = %$raw_content if $raw_content;
     %content        = (
         %content,
         'title' => $PAGES{'ERROR_PAGE'}[1],
@@ -190,8 +193,9 @@ sub error_page {
 #     SEE ALSO: ---
 #==============================================================================
 sub signup_page {
+    my %content;
     my $raw_content = shift;
-    my %content     = %$raw_content if $raw_content;
+    %content        = %$raw_content if $raw_content;
     %content        = (
         %content,
         'title' => $PAGES{'SIGNUP_PAGE'}[1],
@@ -219,8 +223,9 @@ sub signup_page {
 #     SEE ALSO: ---
 #==============================================================================
 sub login_page {
+    my %content;
     my $raw_content = shift;
-    my %content     = %$raw_content if $raw_content;
+    %content        = %$raw_content if $raw_content;
     %content        = (
         %content,
         'title' => $PAGES{'LOGIN_PAGE'}[1],
@@ -248,8 +253,9 @@ sub login_page {
 #     SEE ALSO: ---
 #==============================================================================
 sub restore_page {
+    my %content;
     my $raw_content = shift;
-    my %content     = %$raw_content if $raw_content;
+    %content        = %$raw_content if $raw_content;
     %content        = (
         %content,
         'title' => $PAGES{'RESTORE_PAGE'}[1],
@@ -277,8 +283,9 @@ sub restore_page {
 #     SEE ALSO: ---
 #==============================================================================
 sub passwd_page {
+    my %content;
     my $raw_content = shift;
-    my %content     = %$raw_content if $raw_content;
+    %content        = %$raw_content if $raw_content;
     %content        = (
         %content,
         'title' => $PAGES{'PASSWD_PAGE'}[1],
@@ -306,8 +313,9 @@ sub passwd_page {
 #     SEE ALSO: ---
 #==============================================================================
 sub profile_page {
+    my %content;
     my $raw_content = shift;
-    my %content     = %$raw_content if $raw_content;
+    %content        = %$raw_content if $raw_content;
     %content        = (
         %content,
         'title' => $PAGES{'PROFILE_PAGE'}[1],
@@ -339,8 +347,9 @@ sub profile_page {
 #     SEE ALSO: ---
 #==============================================================================
 sub reviews_page {
+    my %content;
     my $raw_content = shift;
-    my %content     = %$raw_content if $raw_content;
+    %content        = %$raw_content if $raw_content;
     %content        = (
         %content,
         'title' => $PAGES{'REVIEWS_PAGE'}[1],
@@ -360,6 +369,5 @@ sub reviews_page {
     $page   =   _format($page, \%content);
     return $page;
 }
-
 
 1;
