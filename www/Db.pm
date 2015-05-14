@@ -150,13 +150,18 @@ sub insert {
 #==============================================================================
 sub select {
     my $table_name = shift or return 0;
-    my %values = %{(shift)} or return 0;
+    my $tmp = shift;
+    my %values = %$tmp;
     my $values_string = '';
     foreach my $key (keys %values) {
         $values_string .= "$key='$values{$key}' AND ";
     }
-    $values_string = substr($values_string, 0, -5);
-    my $cmd_string = "SELECT * FROM $table_name WHERE $values_string;";
+    my $cmd_string = "SELECT * FROM $table_name";
+    if ($values_string) {
+        $values_string = substr($values_string, 0, -5);
+        $cmd_string .= " WHERE $values_string";
+    }
+    $cmd_string .= " ORDER BY username;";
     my %POSTGRES = (
         %POSTGRES_SETTINGS,
         'CMD' => $cmd_string

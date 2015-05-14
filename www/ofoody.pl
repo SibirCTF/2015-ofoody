@@ -24,8 +24,14 @@ use utf8;
 
 use Switch;
 
+use Data::Dumper;
+
 use Auth;
 use Ui;
+
+my %TABLES = (
+    'USERS' => 'USERS'
+);
 
 #===  FUNCTION  ===============================================================
 #         NAME: _get_cookie
@@ -192,7 +198,25 @@ sub choose_action {
             $response = Ui::restore_page(\%content);
         }
         case 'reviews' {
-            $response = Ui::reviews_page();
+            my %content;
+            my @table = Db::select($TABLES{'USERS'}, {});
+            foreach my $item (@table) {
+                if (!@$item[2]) {
+                    map splice(@$_, 2, 1), @table;
+                }
+                $content{'msg'} .= "<tr>\
+                                <td>\
+                                    @$item[1]\
+                                ";
+                $content{'msg'} .= "</td>\
+                                <td>\
+                                    @$item[2]\
+                                ";
+                $content{'msg'} .= "</td>\
+                            </tr>\
+                            ";
+            }
+            $response = Ui::reviews_page(\%content);
         }
         case 'profile' {
             $response = Ui::profile_page();
