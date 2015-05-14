@@ -1,14 +1,11 @@
-#!/usr/bin/env perl
+#
 #==============================================================================
 #
 #         FILE: Ui.pm
 #
-#        USAGE: See comments below
+#  DESCRIPTION: O'Foody Web UI Module
 #
-#  DESCRIPTION: O'Foody Web UI module
-#
-#      OPTIONS: ---
-# REQUIREMENTS: ---
+#        FILES: ---
 #         BUGS: ---
 #        NOTES: ---
 #       AUTHOR: Vladislav A. Retivykh (var), firolunis@riseup.net
@@ -79,7 +76,7 @@ my %PAGES       = (
 
 #===  FUNCTION  ===============================================================
 #         NAME: _read_file
-#      PURPOSE: Reading HTML PAGES
+#      PURPOSE: Reading HTML Pages
 #   PARAMETERS: Path to file
 #      RETURNS: File content
 #  DESCRIPTION: Read file to string

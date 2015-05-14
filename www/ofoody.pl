@@ -24,10 +24,8 @@ use utf8;
 
 use Switch;
 
-use Data::Dumper;
-
+use Auth;
 use Ui;
-use Db;
 
 #===  FUNCTION  ===============================================================
 #         NAME: _get_cookie
@@ -141,36 +139,57 @@ sub choose_action {
     my %env     = %$raw_env;
     my @path    = _get_path(\%env);
     my $response;
+    my $username    = '';
+    my $session     = '';
     switch ($path[0]) {
         case '' {
             $response = Ui::main_page();
         }
         case 'login' {
             my %content;
-            $content{'msg'} = Dumper(_get_post_data(\%env));
+            my %post_data = _get_post_data(\%env);
+            if (%post_data) {
+                ($content{'msg'}, $username, $session) = Auth::login(\%post_data);
+            }
             $response = Ui::login_page(\%content);
         }
         case 'signup' {
             my %content;
             my %post_data = _get_post_data(\%env);
             if (%post_data) {
-                my @values = (
-                    $post_data{'username'},
-                    $post_data{'review'},
-                    $post_data{'ccn'},
-                    $post_data{'address'},
-                    $post_data{'password'}
-                );
-                Db::insert('USERS', \@values);
-                $content{'msg'} = 'OK';
+                $content{'msg'} = Auth::signup(\%post_data);
             }
             $response = Ui::signup_page(\%content);
         }
+        case 'logout' {
+            my %cookie = _get_cookie(\%env);
+            ($username, $session) = Auth::logout(\%cookie);
+            $response = Ui::main_page();
+        }
         case 'passwd' {
-            $response = Ui::passwd_page();
+            my %content;
+            my %post_data   = _get_post_data(\%env);
+            my %cookie      = _get_cookie(\%env);
+            if (%post_data) {
+                if (exists $cookie{'username'}) {
+                    %post_data = (
+                        %post_data,
+                        'username' => $cookie{'username'}
+                    );
+                    $content{'msg'} = Auth::passwd(\%post_data);
+                } else {
+                    $content{'msg'} = 'You must be logged in';
+                }
+            }
+            $response = Ui::passwd_page(\%content);
         }
         case 'restore' {
-            $response = Ui::restore_page();
+            my %content;
+            my %post_data = _get_post_data(\%env);
+            if (%post_data) {
+                $content{'msg'} = Auth::restore(\%post_data);
+            }
+            $response = Ui::restore_page(\%content);
         }
         case 'reviews' {
             $response = Ui::reviews_page();
@@ -185,7 +204,11 @@ sub choose_action {
             $response = Ui::error_page(\%content);
         }
     }
-    return [200, ['Content-Type' => 'text/html'], ["$response\n"]];
+    return [200, [
+        'Content-Type'  => 'text/html',
+        'Set-Cookie'    => $username,
+        'Set-Cookie'    => $session
+    ], ["$response\n"]];
 }
 
 #===  FUNCTION  ===============================================================
