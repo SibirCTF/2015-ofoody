@@ -21,7 +21,7 @@ use strict;
 use warnings FATAL => 'all';
 use utf8;
 
-my $LEGACY = 0;
+my $LEGACY = 1;
 eval "use DBI; 1;"      or $LEGACY = 1;
 eval "use DBD::Pg; 1;"  or $LEGACY = 1;
 
@@ -33,12 +33,12 @@ my %POSTGRES_SETTINGS = (
     DB       => 'ofoody'
 );
 my $PSQL_CMD = 'psql\
+    --tuples-only\
     --username={USER}\
     --host={HOST}\
     --port={PORT}\
     --dbname={DB}\
-    --command="{CMD}"\
-    --tuples-only\
+    --command="{CMD}"
 ';
 my $DBI_CMD = 'DBI:Pg:dbname={DB};host={HOST};port={PORT}';
 
@@ -58,8 +58,40 @@ sub _format {
     my $raw_content = shift;
     %content        = %$raw_content if $raw_content;
     foreach my $key (keys %content) {
-        $string =~ s/\{$key\}/$content{$key}/;
+        $string =~ s/\{$key\}/$content{$key}/g;
     }
+    return $string;
+}
+
+#===  FUNCTION  ===============================================================
+#         NAME: _sanitize
+#      PURPOSE: Sanitizing strings
+#   PARAMETERS: String
+#      RETURNS: Sanitized string
+#  DESCRIPTION: Add backslashs to string
+#       THROWS: ---
+#     COMMENTS: ---
+#     SEE ALSO: ---
+#==============================================================================
+sub _sanitize {
+    my $string  = shift;
+    $string     =~ s/(')/\\$1/g;
+    return $string;
+}
+
+#===  FUNCTION  ===============================================================
+#         NAME: _irishize
+#      PURPOSE: Irishizing strings
+#   PARAMETERS: String
+#      RETURNS: Irishized string
+#  DESCRIPTION: Add irish symbols to string
+#       THROWS: ---
+#     COMMENTS: ---
+#     SEE ALSO: ---
+#==============================================================================
+sub _irishize {
+    my $string  = shift;
+    $string     =~ s/^O([A-Z])/O'$1/g;
     return $string;
 }
 
@@ -154,7 +186,11 @@ sub select {
     my %values = %$tmp;
     my $values_string = '';
     foreach my $key (keys %values) {
-        $values_string .= "$key='$values{$key}' AND ";
+        $values_string .= _irishize(
+            _sanitize($key)
+        ) . "='" . _irishize(
+            _sanitize($values{$key})
+        ) . "' AND ";
     }
     my $cmd_string = "SELECT * FROM $table_name";
     if ($values_string) {

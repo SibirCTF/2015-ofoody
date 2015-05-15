@@ -134,7 +134,7 @@ sub main_page {
         'head'  => $PAGES{'MAIN_PAGE'}[2]
     );
     my $page;
-    if (exists $content{'name'}) {
+    if (exists $content{'username'} && exists $content{'username_url'}) {
         $page = _read_file($HTML_DIR . $PAGES{'HEADER_USER'}[0]);
     } else {
         $page = _read_file($HTML_DIR . $PAGES{'HEADER'}[0]);
@@ -168,7 +168,7 @@ sub error_page {
         $content{'msg'} = '';
     }
     my $page;
-    if (exists $content{'name'}) {
+    if (exists $content{'username'}) {
         $page = _read_file($HTML_DIR . $PAGES{'HEADER_USER'}[0]);
     } else {
         $page = _read_file($HTML_DIR . $PAGES{'HEADER'}[0]);
@@ -292,7 +292,11 @@ sub passwd_page {
         $content{'msg'} = '';
     }
     my $page;
-    $page   =   _read_file($HTML_DIR . $PAGES{'HEADER_USER'}[0]);
+    if (exists $content{'username'}) {
+        $page = _read_file($HTML_DIR . $PAGES{'HEADER_USER'}[0]);
+    } else {
+        $page = _read_file($HTML_DIR . $PAGES{'HEADER'}[0]);
+    }
     $page   .=  _read_file($HTML_DIR . $PAGES{'PASSWD_PAGE'}[0]);
     $page   .=  _read_file($HTML_DIR . $PAGES{'FOOTER'}[0]);
     $page   =   _format($page, \%content);
@@ -322,7 +326,7 @@ sub profile_page {
         $content{'msg'} = '';
     }
     my $page;
-    if (exists $content{'name'}) {
+    if (exists $content{'username'}) {
         $page = _read_file($HTML_DIR . $PAGES{'HEADER_USER'}[0]);
     } else {
         $page = _read_file($HTML_DIR . $PAGES{'HEADER'}[0]);
@@ -356,7 +360,7 @@ sub reviews_page {
         $content{'msg'} = '';
     }
     my $page;
-    if (exists $content{'name'}) {
+    if (exists $content{'username'}) {
         $page = _read_file($HTML_DIR . $PAGES{'HEADER_USER'}[0]);
     } else {
         $page = _read_file($HTML_DIR . $PAGES{'HEADER'}[0]);

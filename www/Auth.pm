@@ -148,7 +148,7 @@ sub login {
 #===  FUNCTION  ===============================================================
 #         NAME: logout
 #      PURPOSE: User logout
-#   PARAMETERS: {POST data}
+#   PARAMETERS: ---
 #      RETURNS: [Username, Session cookie]
 #  DESCRIPTION: Handle users logout
 #       THROWS: ---
@@ -156,16 +156,9 @@ sub login {
 #     SEE ALSO: ---
 #==============================================================================
 sub logout {
-    my %cookie = %{(shift)} or return 0;
     my @response;
-    my $username    = 'username=';
-    $username       .= "$cookie{'username'}";
-    $username       .= '; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    push @response, $username;
-    my $session = 'session=';
-    $session .= _encode($cookie{'username'});
-    $session .= '; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    push @response, $session;
+    push @response, 'username=-; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    push @response, 'session=-; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     return @response;
 }
 
@@ -237,6 +230,29 @@ sub passwd {
         $response = "Wrong password";
     }
     return $response;
+}
+
+#===  FUNCTION  ===============================================================
+#         NAME: check
+#      PURPOSE: Checking users
+#   PARAMETERS: Username, Session
+#      RETURNS: Boolean
+#  DESCRIPTION: Check user rights
+#       THROWS: ---
+#     COMMENTS: ---
+#     SEE ALSO: ---
+#==============================================================================
+sub check {
+    my $username = shift or return 0;
+    my $session = shift or return 0;
+    my %check_data = (
+        'username'  => $username,
+    );
+    my @check_user = Db::select(
+        $TABLES{'USERS'},
+        \%check_data
+    );
+    return _encode($check_user[0][1]) eq $session;
 }
 
 1;
