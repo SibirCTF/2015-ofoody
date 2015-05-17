@@ -21,7 +21,7 @@ use strict;
 use warnings FATAL => 'all';
 use utf8;
 
-my $LEGACY = 1;
+my $LEGACY = 0;
 eval "use DBI; 1;"      or $LEGACY = 1;
 eval "use DBD::Pg; 1;"  or $LEGACY = 1;
 
