@@ -145,4 +145,114 @@ sub login {
     return @response;
 }
 
+#===  FUNCTION  ===============================================================
+#         NAME: logout
+#      PURPOSE: User logout
+#   PARAMETERS: ---
+#      RETURNS: [Username, Session cookie]
+#  DESCRIPTION: Handle users logout
+#       THROWS: ---
+#     COMMENTS: ---
+#     SEE ALSO: ---
+#==============================================================================
+sub logout {
+    my @response;
+    push @response, 'username=-; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    push @response, 'session=-; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    return @response;
+}
+
+#===  FUNCTION  ===============================================================
+#         NAME: restore
+#      PURPOSE: Restoring passwords
+#   PARAMETERS: {POST data}
+#      RETURNS: Message
+#  DESCRIPTION: Restore user password
+#       THROWS: ---
+#     COMMENTS: ---
+#     SEE ALSO: ---
+#==============================================================================
+sub restore {
+    my %post_data = %{(shift)} or return 0;
+    my %check_data = (
+        'username'  => $post_data{'username'},
+        'ccn'       => $post_data{'ccn'}
+    );
+    my @check_user = Db::select(
+        $TABLES{'USERS'},
+        \%check_data
+    );
+    my $response;
+    if (@check_user) {
+        my $new_password = _random_string(10);
+        Db::update(
+            $TABLES{'USERS'},
+            \%post_data,
+            {'password' => $new_password}
+        );
+        $response = "Your new password is $new_password";
+    } else {
+        $response = "Wrong Name/Credit card number";
+    }
+    return $response;
+}
+
+#===  FUNCTION  ===============================================================
+#         NAME: passwd
+#      PURPOSE: Changing passwords
+#   PARAMETERS: {POST data}
+#      RETURNS: Message
+#  DESCRIPTION: Change user password
+#       THROWS: ---
+#     COMMENTS: ---
+#     SEE ALSO: ---
+#==============================================================================
+sub passwd {
+    my %post_data = %{(shift)} or return 0;
+    my %check_data = (
+        'username'  => $post_data{'username'},
+        'password'  => $post_data{'password'}
+    );
+    my @check_user = Db::select(
+        $TABLES{'USERS'},
+        \%check_data
+    );
+    my $response;
+    if (@check_user) {
+        my $new_password = $post_data{'newpassword'};
+        Db::update(
+            $TABLES{'USERS'},
+            \%check_data,
+            {'password' => $new_password}
+        );
+        $response = "Your new password is $new_password";
+    } else {
+        $response = "Wrong password";
+    }
+    return $response;
+}
+
+#===  FUNCTION  ===============================================================
+#         NAME: check
+#      PURPOSE: Checking users
+#   PARAMETERS: Username, Session
+#      RETURNS: Boolean
+#  DESCRIPTION: Check user rights
+#       THROWS: ---
+#     COMMENTS: ---
+#     SEE ALSO: ---
+#==============================================================================
+sub check {
+    my $username = shift or return 0;
+    my $session = shift or return 0;
+    my %check_data = (
+        'username'  => $username,
+    );
+    my @check_user = Db::select(
+        $TABLES{'USERS'},
+        \%check_data
+    );
+    return _encode($check_user[0][1]) eq $session;
+}
+
 1;
