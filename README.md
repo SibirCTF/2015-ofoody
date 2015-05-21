@@ -17,10 +17,12 @@ apt-get install -y nginx postgresql uwsgi uwsgi-plugin-psgi
 Create user and directory:
 ```
 useradd -M -d /home/ofoody ofoody
-chown -R ofoody:ofoody /home/ofoody
 ```
 
-Place repository content to /home/ofoody
+Place repository content to /home/ofoody and change owner:
+```
+chown -R ofoody:ofoody /home/ofoody
+```
 
 Copy configuration files:
 ```
