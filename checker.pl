@@ -100,7 +100,7 @@ sub _check {
 #      PURPOSE: Putting flag
 #   PARAMETERS: hostname, id, flag
 #      RETURNS: Exit code
-#  DESCRIPTION: Put action
+#  DESCRIPTION: Put flag
 #       THROWS: ---
 #     COMMENTS: ---
 #     SEE ALSO: ---
