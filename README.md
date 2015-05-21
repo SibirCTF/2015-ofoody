@@ -99,11 +99,8 @@ Checker input params
 ```
 $1 = CMD
 $2 = HOST
-$3 = FLAG
-$4 = USERNAME
-$5 = PASSWORD
-$6 = ADDRESS
-$7 = REVIEW
+$3 = ID
+$4 = FLAG
 ```
 
 Example checker call
@@ -115,9 +112,9 @@ Example checker call
 echo "TEST CHECK"
 ./checker.pl check 127.0.0.1
 echo "TEST PUT"
-./checker.pl put 127.0.0.1 734b12fac1c2875367114a1d42730610 User Password Address Review
+./checker.pl put 127.0.0.1 testuser 734b12fac1c2875367114a1d42730610
 echo "TEST GET"
-./checker.pl get 127.0.0.1 34b12fac1c2875367114a1d42730610 User Password
+./checker.pl get 127.0.0.1 testuser 734b12fac1c2875367114a1d42730610
 ```
 
 Exit codes

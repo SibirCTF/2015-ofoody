@@ -3,7 +3,7 @@
 #
 #         FILE: checker.pl
 #
-#        USAGE: ./checker.pl cmd hostname ccn username password address review
+#        USAGE: ./checker.pl cmd hostname id flag
 #
 #  DESCRIPTION: O'Foody service checker
 #
@@ -23,7 +23,10 @@ use warnings FATAL => 'all';
 use utf8;
 
 use LWP::UserAgent;
+use Digest::MD5;
 
+my $PORT = 9999;
+my $SALT = '$|8iRcTf2o|S';
 my %EXIT_CODES = (
     'Need more args'    => 110,
     'Host unreachable'  => 104,
@@ -31,6 +34,41 @@ my %EXIT_CODES = (
     'Flag not found'    => 102,
     'OK'                => 101
 );
+
+#===  FUNCTION  ===============================================================
+#         NAME: _encode
+#      PURPOSE: Encoding strings
+#   PARAMETERS: String
+#      RETURNS: Encoded string
+#  DESCRIPTION: Encode string with salt via MD5
+#       THROWS: ---
+#     COMMENTS: ---
+#     SEE ALSO: ---
+#==============================================================================
+sub _encode {
+    my $string  = shift or return 0;
+    my $md5     = Digest::MD5->new;
+    $md5->add($string . $SALT);
+    return $md5->b64digest;
+}
+
+#===  FUNCTION  ===============================================================
+#         NAME: _random_string
+#      PURPOSE: Generating random strings
+#   PARAMETERS: Length
+#      RETURNS: Random string
+#  DESCRIPTION: Generate random string
+#       THROWS: ---
+#     COMMENTS: ---
+#     SEE ALSO: ---
+#==============================================================================
+sub _random_string {
+    my $length  = shift or return 0;
+    my @chars   = ("A".."Z", "a".."z");
+    my $string;
+    $string .= $chars[rand @chars] for 1..$length;
+    return $string
+}
 
 #===  FUNCTION  ===============================================================
 #         NAME: _check
@@ -47,13 +85,20 @@ sub _check {
     if (system("ping -c 1 -t 3 $hostname > /dev/null 2>&1")) {
         return $EXIT_CODES{'Host unreachable'};
     }
-    return $EXIT_CODES{'OK'};
+    my $ua          = LWP::UserAgent->new();
+    my $page        = $ua->get("http://$hostname:$PORT");
+    my $content     = $page->decoded_content();
+    if (0+($content =~ m/Whiskey and cookies delivery/g)) {
+        return $EXIT_CODES{'OK'};
+    } else {
+        return $EXIT_CODES{'Bad answer'};
+    }
 }
 
 #===  FUNCTION  ===============================================================
 #         NAME: _put
 #      PURPOSE: Putting flag
-#   PARAMETERS: hostname, ccn, username, password, address, review
+#   PARAMETERS: hostname, id, flag
 #      RETURNS: Exit code
 #  DESCRIPTION: Put action
 #       THROWS: ---
@@ -62,21 +107,21 @@ sub _check {
 #==============================================================================
 sub _put {
     my $hostname    = shift or return $EXIT_CODES{'Need more args'};
-    my $ccn         = shift or return $EXIT_CODES{'Need more args'};
-    my $username    = shift or return $EXIT_CODES{'Need more args'};
-    my $password    = shift or return $EXIT_CODES{'Need more args'};
-    my $address     = shift or return $EXIT_CODES{'Need more args'};
-    my $review      = shift or return $EXIT_CODES{'Need more args'};
+    my $id          = shift or return $EXIT_CODES{'Need more args'};
+    my $flag        = shift or return $EXIT_CODES{'Need more args'};
+    my $password    = _encode($id);
+    my $address     = _random_string(16);
+    my $review      = _random_string(24);
     my $ua          = LWP::UserAgent->new();
-    my $page        = $ua->post("http://$hostname:9999/signup", {
-        'username'  => $username,
+    my $page        = $ua->post("http://$hostname:$PORT/signup", {
+        'username'  => $id,
         'address'   => $address,
-        'ccn'       => $ccn,
+        'ccn'       => $flag,
         'review'    => $review,
         'password'  => $password
     });
     my $content     = $page->decoded_content();
-    if (0+($content =~ m/User $username was registered/g)) {
+    if (0+($content =~ m/User $id was registered/g)) {
         return $EXIT_CODES{'OK'};
     } else {
         return $EXIT_CODES{'Bad answer'};
@@ -86,7 +131,7 @@ sub _put {
 #===  FUNCTION  ===============================================================
 #         NAME: _get
 #      PURPOSE: Getting flags
-#   PARAMETERS: hostname, ccn, username, password
+#   PARAMETERS: hostname, id, flag
 #      RETURNS: Exit code
 #  DESCRIPTION: Get flag
 #       THROWS: ---
@@ -95,18 +140,18 @@ sub _put {
 #==============================================================================
 sub _get {
     my $hostname    = shift or return $EXIT_CODES{'Need more args'};
-    my $ccn         = shift or return $EXIT_CODES{'Need more args'};
-    my $username    = shift or return $EXIT_CODES{'Need more args'};
-    my $password    = shift or return $EXIT_CODES{'Need more args'};
+    my $id          = shift or return $EXIT_CODES{'Need more args'};
+    my $flag        = shift or return $EXIT_CODES{'Need more args'};
+    my $password    = _encode($id);
     my $ua          = LWP::UserAgent->new();
     $ua->cookie_jar({});
-    my $page        = $ua->post("http://$hostname:9999/login", {
-        'username'  => $username,
+    my $page        = $ua->post("http://$hostname:$PORT/login", {
+        'username'  => $id,
         'password'  => $password
     });
     my %cookie      = %{($ua->cookie_jar())};
     $page           = $ua->get(
-        "http://$hostname:9999/profile?username=$username"
+        "http://$hostname:$PORT/profile?username=$id"
     );
     my $content     = $page->decoded_content();
     $content        =~ s/.*<table class="table">[^<]*(.*)[^<]*<\/table.*/$1/s;
@@ -114,7 +159,7 @@ sub _get {
     $content        =~ s/\n\s+/\n/g;
     $content        =~ s/^\s*//g;
     $content        =~ s/^([^\n]*\n){3}([^\n]*)\n.*/$2/s;
-    if (0+($content =~ m/$ccn/g)) {
+    if (0+($content =~ m/$flag/g)) {
         return $EXIT_CODES{'OK'};
     } else {
         return $EXIT_CODES{'Flag not found'};
@@ -124,7 +169,7 @@ sub _get {
 #===  FUNCTION  ===============================================================
 #         NAME: main
 #      PURPOSE: Choosing action
-#   PARAMETERS: hostname, ccn, username, password, address, review
+#   PARAMETERS: cmd, hostname, id, flag
 #      RETURNS: Exit code
 #  DESCRIPTION: Choose action
 #       THROWS: ---
@@ -134,27 +179,19 @@ sub _get {
 sub main {
     my $cmd         = shift or return $EXIT_CODES{'Need more args'};
     my $hostname    = shift or return $EXIT_CODES{'Need more args'};
-    my $ccn;
-    my $username;
-    my $password;
-    my $address;
-    my $review;
+    my $id;
+    my $flag;
     if ($cmd eq 'put' or $cmd eq 'get') {
-        $ccn        = shift or return $EXIT_CODES{'Need more args'};
-        $username   = shift or return $EXIT_CODES{'Need more args'};
-        $password   = shift or return $EXIT_CODES{'Need more args'};
-    }
-    if ($cmd eq 'put') {
-        $address    = shift or return $EXIT_CODES{'Need more args'};
-        $review     = shift or return $EXIT_CODES{'Need more args'};
+        $id     = shift or return $EXIT_CODES{'Need more args'};
+        $flag   = shift or return $EXIT_CODES{'Need more args'};
     }
 
     if ($cmd eq 'check') {
         return _check($hostname);
     } elsif ($cmd eq 'put') {
-        return _put($hostname, $ccn, $username, $password, $address, $review);
+        return _put($hostname, $id, $flag);
     } elsif ($cmd eq 'get') {
-        return _get($hostname, $ccn, $username, $password);
+        return _get($hostname, $id, $flag);
     } else {
         return $EXIT_CODES{'Need more args'};
     }
