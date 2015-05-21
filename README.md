@@ -84,11 +84,9 @@ service postgresql restart
 ```
 
 Checker
--------
+=======
 
-```
-./checker.pl
-```
+checker.pl
 
 URL
 ---
@@ -120,6 +118,16 @@ echo "TEST PUT"
 ./checker.pl put 127.0.0.1 734b12fac1c2875367114a1d42730610 User Password Address Review
 echo "TEST GET"
 ./checker.pl get 127.0.0.1 34b12fac1c2875367114a1d42730610 User Password
+```
+
+Exit codes
+----------
+```
+110 - Need more arguments
+104 - Host unreachable
+103 - Bad answer
+102 - Flag not found
+101 - OK
 ```
 
 Credits
