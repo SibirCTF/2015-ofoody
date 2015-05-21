@@ -30,6 +30,13 @@ cp -f /home/ofoody/conf/pg_hba.conf /etc/postgresql/9.4/main/pg_hba.conf
 cp /home/ofoody/conf/ofoody.conf /etc/nginx/sites-enabled/ofoody.conf
 ```
 
+Create log files:
+```
+mkdir /home/ofoody/logs
+touch /home/ofoody/logs/ofoody.access.log
+touch /home/ofoody/logs/ofoody.error.log
+```
+
 Run nginx:
 ```
 service nginx restart
