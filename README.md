@@ -54,7 +54,7 @@ Create ofoody database:
 
 Create ofoody table:
 ```
-psql -U postgres -h 127.0.0.1 -d ofoody -c "CREATE TABLE IF NOT EXISTS USERS (id serial PRIMARY KEY, username text NOT NULL, review text, ccn text NOT NULL, address text NOT NULL, password text NOT NULL);
+psql -U postgres -h 127.0.0.1 -d ofoody -c "CREATE TABLE IF NOT EXISTS USERS (id serial PRIMARY KEY, username text NOT NULL, review text, ccn text NOT NULL, address text NOT NULL, password text NOT NULL);"
 ```
 
 Insert first record:
