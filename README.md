@@ -1,6 +1,8 @@
 O'Foody
 =======
 
+Автор: Владислав Ретивых
+
 SibirCTF 2015 O'Foody service
 
 Installation
